@@ -12,8 +12,10 @@ from datetime import date
 from tkinter import messagebox
 from tkinter import filedialog
 import pyAesCrypt as pY
+from dotenv import load_dotenv
 
 
+load_dotenv()
 LARGE_FONT = ("Verdana", 12)
 
 
@@ -50,14 +52,14 @@ class Home(Frame):
         controller.title("Archer")
         controller.resizable(height=False, width=False)
 
-        self.icon = os.path.join("favicon.ico")
+        self.icon = os.path.join("Images", "favicon.ico")
 
         controller.iconbitmap(self.icon)
 
         self.title = ttk.Label(self, text="Archer Home Page", font=LARGE_FONT, width=20)
         self.title.pack(side=TOP)
 
-        self.image = ImageTk.PhotoImage(Image.open("Screen_image.jpg"))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", "Screen_image.jpg")))
 
         self.screen_image = Label(self, image=self.image)
         self.screen_image.pack()
@@ -71,7 +73,7 @@ class Login(Frame):
         Frame.__init__(self, parent)
         self.controller = controller
         # Image
-        self.image = ImageTk.PhotoImage(Image.open("Admin_screen.jpg"))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", "Admin_screen.jpg")))
 
         self.screen_image = Label(self, image=self.image)
 
@@ -101,9 +103,9 @@ class Login(Frame):
 
     def Login(self):
         # Database
-        db = sql.connect(host="localhost",
-                         user="root",
-                         password="781#423#0565!",
+        db = sql.connect(host="192.168.1.21",
+                         user="ZaneColeRiley",
+                         password="CadenRiley214569",
                          database="archer")
 
         cursor = db.cursor()
@@ -114,9 +116,9 @@ class Login(Frame):
             passwd = self.adminpass.get()
 
             cursor.execute(f"select * from login where Username='{user}' and Password='{passwd}'")
-            rud = cursor.fetchall()
+            account = cursor.fetchall()
 
-            if rud:
+            if account:
                 self.controller.show_frame(Admin)
                 break
             else:
@@ -138,7 +140,7 @@ class Admin(Frame):
 
         self.title.pack(side=TOP)
 
-        self.image = ImageTk.PhotoImage(Image.open("Admin_screen.jpg"))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", "Admin_screen.jpg")))
 
         self.screen_image = Label(self, image=self.image)
 
@@ -154,6 +156,7 @@ class Admin(Frame):
         self.todo = ttk.Button(self, text="To Do", command=lambda: controller.show_frame(ToDo), width=22)
         self.encrypt = ttk.Button(self, text="Encrypt File", command=lambda: controller.show_frame(Encryption), width=22)
         self.decrypt = ttk.Button(self, text="Decrypt File", command=lambda: controller.show_frame(Decryption), width=22)
+        self.logout = ttk.Button(self, text="Logout", command=lambda: controller.show_frame(Home), width=22)
 
         # Placements
         self.screen_image.pack()
@@ -180,12 +183,14 @@ class Admin(Frame):
 
         self.decrypt.place(x=840, y=360)
 
+        self.logout.place(x=840, y=460)
+
 
 class SMS(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         # Image
-        self.image = ImageTk.PhotoImage(Image.open("Screen_image.jpg"))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", "Screen_image.jpg")))
         self.screen_image = Label(self, image=self.image)
         self.screen_image.pack()
 
@@ -195,6 +200,20 @@ class SMS(Frame):
             'tmobile': "@tmomail.net",
             'verizon': '@vtext.com',
             'sprint': '@page.nextel.com'}
+
+        self.contacts = {
+            'Mom': "7138515281",
+            'Kayla': "8324700056",
+            'Dad': "8324916451",
+            'Caden': "8324700308"
+        }
+
+        self.contacts_carrier = {
+            "Mom": self.carriers['verizon'],
+            "Kayla": self.carriers['verizon'],
+            "Dad": self.carriers['verizon'],
+            "Caden": self.carriers['verizon']
+        }
 
         # Text Entry
         self.text_box = ttk.Entry(self, font=LARGE_FONT, width=120)
@@ -238,7 +257,8 @@ class SMS(Frame):
         self.date = str(date.today())
 
     def send_message(self):
-        number = (self.number_entry.get() + self.carrier_entry.get())
+        number = self.number_entry.get()
+        number_carrier = self.carrier_entry.get()
         auth = ["smithcaden03@gmail.com", "Pikachu2"]
 
         # Mail Server
@@ -247,17 +267,35 @@ class SMS(Frame):
         server.login(auth[0], auth[1])
 
         # Send Text message
-        server.sendmail(auth[0], number, self.text_box.get())
+        if number == "Mom" and number_carrier == "Mom":
+            server.sendmail(auth[0], self.contacts["Mom"] + self.contacts_carrier['Mom'], self.text_box.get())
+
+        if number == "Kayla" and number_carrier == "Kayla":
+            server.sendmail(auth[0], self.contacts["Kayla"] + self.contacts_carrier['Kayla'], self.text_box.get())
+
+        if number == "Dad" and number_carrier == "Dad":
+            server.sendmail(auth[0], self.contacts["Dad"] + self.contacts_carrier['Dad'], self.text_box.get())
+
+        if number == "Caden" and number_carrier == "Caden":
+            server.sendmail(auth[0], self.contacts["Caden"] + self.contacts_carrier['Caden'], self.text_box.get())
+
+        else:
+            server.sendmail(auth[0], number + number_carrier, self.text_box.get())
+
         if smtplib.SMTPException is not True:
             print("Text Sent")
 
-            db = sql.connect(host="localhost",
-                             user="CadenSmith",
+            db = sql.connect(host="192.168.1.21",
+                             user="ZaneColeRiley",
                              password="CadenRiley214569",
                              database="archer")
             cursor = db.cursor()
 
-            cursor.execute(f"INSERT INTO archer.sms (carrier, to_, from_, msg, date_time) VALUES ('{self.carrier_entry.get()}', '{self.number_entry.get()}', '{auth[0]}', '{self.text_box.get()}', '{self.date + ' ' + self.systemTime}');")
+            stmt = f"""INSERT INTO archer.sms (carrier, to_, from_, msg, date_time) VALUES ('{self.carrier_entry.get()}', '{self.number_entry.get()}', 
+                                                                                                    '{auth[0]}', '{self.text_box.get()}', 
+                                                                                                    '{self.date + ' ' + self.systemTime}');"""
+
+            cursor.execute(stmt)
 
             print(cursor.rowcount, "Record added to database")
 
@@ -272,11 +310,8 @@ class SMS(Frame):
 class Email(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
-        # Driver
-        # self.driver = webdriver.Chrome(executable_path=os.path.join(os.path.dirname(__file__), "chromedriver.exe"))
-
         # Image
-        self.image = ImageTk.PhotoImage(Image.open("Screen_image.jpg"))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", "Screen_image.jpg")))
 
         self.screen_image = Label(self, image=self.image)
 
@@ -300,7 +335,6 @@ class Email(Frame):
         # Buttons
         self.email = ttk.Button(self, text="Send Email", command=self.send_mail, width=22)
         self.back = ttk.Button(self, text="Back to Admin", command=lambda: controller.show_frame(Admin), width=22)
-        # self.mail = ttk.Button(self, text="See Email", command=lambda: self.driver.get(url="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox"), width=22)
 
         # Placements
         self.screen_image.pack()
@@ -319,7 +353,6 @@ class Email(Frame):
 
         self.email.place(x=512, y=570)
         self.back.place(x=512, y=620)
-        # self.mail.place(x=512, y=670)
 
         self.t = time.localtime()
         self.systemTime = str(time.strftime("%I:%M %p", self.t))
@@ -344,13 +377,16 @@ class Email(Frame):
             if smtplib.SMTPException is False:
                 print("Email sent.")
 
-                db = sql.connect(host="localhost",
-                                 user="CadenSmith",
+                db = sql.connect(host="192.168.1.21",
+                                 user="ZaneColeRiley",
                                  password="CadenRiley214569",
                                  database="archer")
                 cursor = db.cursor()
 
-                cursor.execute(f"INSERT INTO archer.smtp (senderEmail, recipientsEmail, msg, date_time) VALUES  ('{self.senders_email.get()}', '{self.recipients_email.get()}', '{self.message.get('1.0', END)}', '{self.date + ' ' + self.systemTime}');")
+                stmt = f"""INSERT INTO archer.smtp (senderEmail, recipientsEmail, msg, date_time) VALUES  ('{self.senders_email.get()}', '{self.recipients_email.get()}', 
+                                                                                                                   '{self.message.get('1.0', END)}', '{self.date + ' ' + self.systemTime}');"""
+
+                cursor.execute(stmt)
 
                 db.commit()
                 print(cursor.rowcount, "Record Successfully Added in to table")
@@ -367,7 +403,7 @@ class Weather(Frame):
         Frame.__init__(self, parent)
 
         # Screen Image
-        self.image = ImageTk.PhotoImage(Image.open("Screen_image.jpg"))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", "Screen_image.jpg")))
         self.screen_image = Label(self, image=self.image)
         self.screen_image.pack()
 
@@ -389,41 +425,43 @@ class Weather(Frame):
 
     def printWeather(self):
 
+        # Weather data collection
         response = requests.get(url=self.url)
         response_air = requests.get(url=self.url_air)
 
         response_json = response.json()
         air_response = response_air.json()
 
-        # Labels
-        self.condition_label = ttk.Label(self, text=str(response_json["current"]["condition"]["text"]), font=LARGE_FONT)
-        self.currentTemp_label = ttk.Label(self, text=str(response_json["current"]["temp_f"]) + " degrees Fahrenheit", font=LARGE_FONT)
-        self.humidity_label = ttk.Label(self, text=str(response_json["current"]["humidity"]) + " Percent humidity", font=LARGE_FONT)
-        self.feelsLike_label = ttk.Label(self, text="Feels Like " + str(response_json["current"]["feelslike_f"]) + " degrees Fahrenheit", font=LARGE_FONT)
-        self.uvIndex_label = ttk.Label(self, text="UV Index is " + str(response_json["current"]["uv"]), font=LARGE_FONT)
-        self.precip_in = ttk.Label(self, text="It rained " + str(response_json['current']['precip_in']) + "Inches", font=LARGE_FONT)
-        self.airQ = ttk.Label(self, text="Current Air Quality " + str(air_response[1]['Category']['Name']), font=LARGE_FONT)
-        self.uvSafetyIndex = ttk.Label(self, text="UV Safety Index", font=LARGE_FONT)
-        self.uvSafetyIndex1 = ttk.Label(self, text="0 to 2 is Low Danger", font=LARGE_FONT)
-        self.uvSafetyIndex2 = ttk.Label(self, text="3 to 5 is Moderate Danger", font=LARGE_FONT)
-        self.uvSafetyIndex3 = ttk.Label(self, text="6 to 7 is High Danger", font=LARGE_FONT)
-        self.uvSafetyIndex4 = ttk.Label(self, text="8 to 10 is Danger is Very High", font=LARGE_FONT)
-        self.uvSafetyIndex5 = ttk.Label(self, text="11 or more is Extreme Danger", font=LARGE_FONT)
+        # Weather Labels
+        condition_label = ttk.Label(self, text=str(response_json["current"]["condition"]["text"]), font=LARGE_FONT)
+        currentTemp_label = ttk.Label(self, text=str(response_json["current"]["temp_f"]) + " degrees Fahrenheit", font=LARGE_FONT)
+        humidity_label = ttk.Label(self, text=str(response_json["current"]["humidity"]) + " Percent humidity", font=LARGE_FONT)
+        feelsLike_label = ttk.Label(self, text="Feels Like " + str(response_json["current"]["feelslike_f"]) + " degrees Fahrenheit", font=LARGE_FONT)
+        uvIndex_label = ttk.Label(self, text="UV Index is " + str(response_json["current"]["uv"]), font=LARGE_FONT)
+        precip_in = ttk.Label(self, text="It rained " + str(response_json['current']['precip_in']) + "Inches", font=LARGE_FONT)
+        airQ = ttk.Label(self, text="Current Air Quality " + str(air_response[1]['Category']['Name']), font=LARGE_FONT)
+        uvSafetyIndex = ttk.Label(self, text="UV Safety Index", font=LARGE_FONT)
+        uvSafetyIndex1 = ttk.Label(self, text="0 to 2 is Low Danger", font=LARGE_FONT)
+        uvSafetyIndex2 = ttk.Label(self, text="3 to 5 is Moderate Danger", font=LARGE_FONT)
+        uvSafetyIndex3 = ttk.Label(self, text="6 to 7 is High Danger", font=LARGE_FONT)
+        uvSafetyIndex4 = ttk.Label(self, text="8 to 10 is Danger is Very High", font=LARGE_FONT)
+        uvSafetyIndex5 = ttk.Label(self, text="11 or more is Extreme Danger", font=LARGE_FONT)
 
         # Placements
 
-        self.condition_label.place(x=312, y=50)
-        self.currentTemp_label.place(x=312, y=120)
-        self.humidity_label.place(x=312, y=190)
-        self.feelsLike_label.place(x=312, y=260)
-        self.precip_in.place(x=312, y=330)
-        self.airQ.place(x=312, y=400)
-        self.uvIndex_label.place(x=312, y=470)
-        self.uvSafetyIndex1.place(x=612, y=120)
-        self.uvSafetyIndex2.place(x=612, y=190)
-        self.uvSafetyIndex3.place(x=612, y=260)
-        self.uvSafetyIndex4.place(x=612, y=330)
-        self.uvSafetyIndex5.place(x=612, y=50)
+        condition_label.place(x=312, y=50)
+        currentTemp_label.place(x=312, y=120)
+        humidity_label.place(x=312, y=190)
+        feelsLike_label.place(x=312, y=260)
+        precip_in.place(x=312, y=330)
+        airQ.place(x=312, y=400)
+        uvIndex_label.place(x=312, y=470)
+        uvSafetyIndex.place(x=780, y=120)
+        uvSafetyIndex1.place(x=612, y=120)
+        uvSafetyIndex2.place(x=612, y=190)
+        uvSafetyIndex3.place(x=612, y=260)
+        uvSafetyIndex4.place(x=612, y=330)
+        uvSafetyIndex5.place(x=612, y=50)
 
     def toDataBase(self):
         try:
@@ -433,28 +471,25 @@ class Weather(Frame):
             response_json = response.json()
             air_response = response_air.json()
 
-            db = sql.connect(host="localhost",
-                             user="CadenSmith",
+            db = sql.connect(host="192.168.1.21",
+                             user="ZaneColeRiley",
                              password="CadenRiley214569",
                              database="archer")
             cursor = db.cursor()
 
-            self.insertTabelInfo = f"""INSERT INTO archer.weather (condition_, temp_f, feelsLike, humidity, uvIndex, precip_in , air_Q, date_)  VALUES 
+            insertTableInfo = f"""INSERT INTO archer.weather (condition_, temp_f, feelsLike, humidity, uvIndex, precip_in , air_Q, date_)  VALUES 
                                             ('{str(response_json["current"]["condition"]["text"])}', '{str(response_json["current"]["temp_f"])}',
                                               '{str(response_json["current"]["feelslike_f"])}', '{str(response_json["current"]["humidity"])}', '{str(response_json["current"]["uv"])}',
                                               '{str(response_json['current']['precip_in'])}', '{str(air_response[1]['Category']['Name'])}', '{str(date.today()) + ' ' + self.systemTime}')"""
 
-            cursor.execute(self.insertTabelInfo)
+            cursor.execute(insertTableInfo)
 
             db.commit()
             print(cursor.rowcount, "Record Successfully Added in to table")
             cursor.close()
+            db.close()
         except sql.Error as error:
             print("Failed to input data {}".format(error))
-
-        finally:
-            if db.is_connected():
-                db.close()
 
 
 class Mood(Frame):
@@ -462,7 +497,7 @@ class Mood(Frame):
         Frame.__init__(self, parent)
 
         # Screen Image
-        self.image = ImageTk.PhotoImage(Image.open("Screen_image.jpg"))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", "Screen_image.jpg")))
         self.screen_image = Label(self, image=self.image)
         self.screen_image.pack()
 
@@ -509,18 +544,19 @@ class Mood(Frame):
         self.back.place(x=550, y=680)
 
     def moodData(self):
-        db = sql.connect(host="localhost",
-                         user="CadenSmith",
+        db = sql.connect(host="192.168.1.21",
+                         user="ZaneColeRiley",
                          password="CadenRiley214569",
                          database="archer")
         cursor = db.cursor()
 
         # Time
-        self.t = time.localtime()
-        self.systemTime = str(time.strftime("%I:%M %p", self.t))
+        t = time.localtime()
+        systemTime = str(time.strftime("%I:%M %p", t))
 
         stmt = f"""INSERT INTO archer.mood (anxiety, anger, down, sad, unknown, summary ,date_time) VALUES 
-                   ('{self.anxiety.get()}', '{self.anger.get()}', '{self.down.get()}', '{self.sad.get()}', '{self.unknown.get()}', '{self.summary.get('1.0', END)}', '{str(date.today()) + ' ' + self.systemTime}')"""
+                   ('{self.anxiety.get()}', '{self.anger.get()}', '{self.down.get()}', '{self.sad.get()}', 
+                    '{self.unknown.get()}', '{self.summary.get('1.0', END)}', '{str(date.today()) + ' ' + systemTime}')"""
 
         cursor.execute(stmt)
         print(cursor.rowcount, "Record added to database.")
@@ -542,7 +578,7 @@ class Journal(Frame):
         Frame.__init__(self, parent)
 
         # Screen Image
-        self.image = ImageTk.PhotoImage(Image.open("Journal.jpg"))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", 'Journal.jpg')))
         self.screenImage = Label(self, image=self.image)
         self.screenImage.pack()
 
@@ -574,18 +610,20 @@ class Journal(Frame):
         self.back.place(x=640, y=660)
 
     def addEntry(self):
-        db = sql.connect(host="localhost",
-                         user="CadenSmith",
+        db = sql.connect(host="192.168.1.21",
+                         user="ZaneColeRiley",
                          password="CadenRiley214569",
                          database="archer")
 
         cursor = db.cursor()
 
         # Time
-        self.t = time.localtime()
-        self.systemTime = str(time.strftime("%I:%M:%S %p", self.t))
+        t = time.localtime()
+        systemTime = str(time.strftime("%I:%M:%S %p", t))
 
-        stmt = f"INSERT INTO archer.journal (morning, afternoon, evening, date_time) VALUES ('{self.morning.get('1.0', END)}', '{self.afternoon.get('1.0', END)}', '{self.evening.get('1.0', END)}', '{str(date.today()) + ' ' + self.systemTime}')"
+        stmt = f"""INSERT INTO archer.journal (morning, afternoon, evening, date_time) VALUES 
+                                              ('{self.morning.get('1.0', END)}', '{self.afternoon.get('1.0', END)}', 
+                                               '{self.evening.get('1.0', END)}', '{str(date.today()) + ' ' + systemTime}')"""
 
         cursor.execute(stmt)
         print(cursor.rowcount, "Record added to your DataBase Journal")
@@ -607,7 +645,7 @@ class Personal(Frame):
         self.title.pack(side=TOP)
 
         # Screen Image
-        self.image = ImageTk.PhotoImage(Image.open("Journal.jpg"))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", 'Journal.jpg')))
         self.screenImage = Label(self, image=self.image)
         self.screenImage.pack()
 
@@ -625,18 +663,18 @@ class Personal(Frame):
         self.back.place(x=520, y=560)
 
     def addEntry(self):
-        db = sql.connect(host="localhost",
-                         user="CadenSmith",
+        db = sql.connect(host="192.168.1.21",
+                         user="ZaneColeRiley",
                          password="CadenRiley214569",
                          database="archer")
 
         cursor = db.cursor()
 
         # Time
-        self.t = time.localtime()
-        self.systemTime = str(time.strftime("%I:%M:%S %p", self.t))
+        t = time.localtime()
+        systemTime = str(time.strftime("%I:%M:%S %p", t))
 
-        stmt = f"INSERT INTO archer.personal (dataEntry, date_time) VALUES ('{self.entry.get('1.0', END)}', '{str(date.today()) + ' ' + self.systemTime}')"
+        stmt = f"INSERT INTO archer.personal (dataEntry, date_time) VALUES ('{self.entry.get('1.0', END)}', '{str(date.today()) + ' ' + systemTime}')"
 
         cursor.execute(stmt)
         print(cursor.rowcount, "Record added to your Personal DataBase Journal")
@@ -652,7 +690,7 @@ class Exercise(Frame):
         Frame.__init__(self, parent)
 
         # Screen Image
-        self.image = ImageTk.PhotoImage(Image.open("Journal.jpg"))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", 'Journal.jpg')))
         self.screenImage = Label(self, image=self.image)
         self.screenImage.pack()
 
@@ -698,14 +736,16 @@ class Exercise(Frame):
         self.back.place(x=560, y=540)
 
     def addEntry(self):
-        db = sql.connect(host="localhost",
-                         user="CadenSmith",
+        db = sql.connect(host="192.168.1.21",
+                         user="ZaneColeRiley",
                          password="CadenRiley214569",
                          database="archer")
 
         cursor = db.cursor()
 
-        stmt = f"INSERT INTO archer.exercise (type_, timeOfDay, howLong, environment, miles, date_time) VALUES ('{self.type_.get()}', '{self.timeOfDay.get()}', '{self.howLong.get()}',' {self.env.get()}', '{self.miles.get()}' ,'{str(date.today()) + ' ' + self.systemTime}')"
+        stmt = f"""INSERT INTO archer.exercise (type_, timeOfDay, howLong, environment, miles, date_time) VALUES 
+                                               ('{self.type_.get()}', '{self.timeOfDay.get()}', '{self.howLong.get()}',
+                                               ' {self.env.get()}', '{self.miles.get()}' ,'{str(date.today()) + ' ' + self.systemTime}')"""
 
         cursor.execute(stmt)
         print(cursor.rowcount, "Record Added to DataBase")
@@ -729,7 +769,7 @@ class Meds(Frame):
         self.title.pack()
 
         # Screen Image
-        self.image = ImageTk.PhotoImage(Image.open("Journal.jpg"))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", 'Journal.jpg')))
         self.screenImage = Label(self, image=self.image)
         self.screenImage.pack()
 
@@ -776,8 +816,8 @@ class Meds(Frame):
         self.back.place(x=560, y=550)
 
     def addMorning(self):
-        db = sql.connect(host="localhost",
-                         user="CadenSmith",
+        db = sql.connect(host="192.168.1.21",
+                         user="ZaneColeRiley",
                          password="CadenRiley214569",
                          database="archer")
 
@@ -797,8 +837,8 @@ class Meds(Frame):
         self.morning.delete(0, END)
 
     def addAfternoon(self):
-        db = sql.connect(host="localhost",
-                         user="CadenSmith",
+        db = sql.connect(host="192.168.1.21",
+                         user="ZaneColeRiley",
                          password="CadenRiley214569",
                          database="archer")
 
@@ -815,8 +855,8 @@ class Meds(Frame):
         self.afternoon.delete(0, END)
 
     def addEvening(self):
-        db = sql.connect(host="localhost",
-                         user="CadenSmith",
+        db = sql.connect(host="192.168.1.21",
+                         user="ZaneColeRiley",
                          password="CadenRiley214569",
                          database="archer")
 
@@ -833,8 +873,8 @@ class Meds(Frame):
         self.evening.delete(0, END)
 
     def addNight(self):
-        db = sql.connect(host="localhost",
-                         user="CadenSmith",
+        db = sql.connect(host="192.168.1.21",
+                         user="ZaneColeRiley",
                          password="CadenRiley214569",
                          database="archer")
 
@@ -859,7 +899,7 @@ class ToDo(Frame):
         self.title.pack(side=TOP)
 
         # Image
-        self.image = ImageTk.PhotoImage(Image.open('Journal.jpg'))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", 'Journal.jpg')))
         self.screen_image = Label(self, image=self.image)
         self.screen_image.pack()
 
@@ -890,9 +930,9 @@ class ToDo(Frame):
         self.back.place(x=515, y=390)
 
     def addEntry(self):
-        db = sql.connect(host='localhost',
-                         user='CadenSmith',
-                         password='CadenRiley214569',
+        db = sql.connect(host="192.168.1.21",
+                         user="ZaneColeRiley",
+                         password="CadenRiley214569",
                          database="archer")
 
         cursor = db.cursor()
@@ -919,7 +959,7 @@ class Encryption(Frame):
         self.title.pack(side=TOP)
 
         # Screen Image
-        self.image = ImageTk.PhotoImage(Image.open("Screen_image.jpg"))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", "Screen_image.jpg")))
         self.screen_image = Label(self, image=self.image)
         self.screen_image.pack()
 
@@ -952,8 +992,8 @@ class Encryption(Frame):
         self.back.place(x=515, y=410)
 
     def encryption(self):
-        db = sql.connect(host='localhost',
-                         user="CadenSmith",
+        db = sql.connect(host="192.168.1.21",
+                         user="ZaneColeRiley",
                          password="CadenRiley214569",
                          database="crypt")
         cursor = db.cursor()
@@ -978,7 +1018,7 @@ class Decryption(Frame):
         self.title.pack(side=TOP)
 
         # Screen Image
-        self.image = ImageTk.PhotoImage(Image.open("Screen_image.jpg"))
+        self.image = ImageTk.PhotoImage(Image.open(os.path.join("Images", "Screen_image.jpg")))
         self.screen_image = Label(self, image=self.image)
         self.screen_image.pack()
 
