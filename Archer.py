@@ -103,10 +103,10 @@ class Login(Frame):
 
     def Login(self):
         # Database
-        db = sql.connect(host="192.168.1.21",
-                         user="ZaneColeRiley",
-                         password="CadenRiley214569",
-                         database="archer")
+        db = sql.connect(host="yourHost",
+                         user="yourUser",
+                         password="yourPass",
+                         database="yourDatabase")
 
         cursor = db.cursor()
 
@@ -202,17 +202,17 @@ class SMS(Frame):
             'sprint': '@page.nextel.com'}
 
         self.contacts = {
-            'Mom': "7138515281",
-            'Kayla': "8324700056",
-            'Dad': "8324916451",
-            'Caden': "8324700308"
+            'person': "number",
+            'person': "number",
+            'person': "number",
+            'person': "number"
         }
 
         self.contacts_carrier = {
-            "Mom": self.carriers['verizon'],
-            "Kayla": self.carriers['verizon'],
-            "Dad": self.carriers['verizon'],
-            "Caden": self.carriers['verizon']
+            "person": "carrier",
+            "person": "carrier",
+            "person": "carrier",
+            "person": "carrier"
         }
 
         # Text Entry
@@ -259,7 +259,7 @@ class SMS(Frame):
     def send_message(self):
         number = self.number_entry.get()
         number_carrier = self.carrier_entry.get()
-        auth = ["smithcaden03@gmail.com", "Pikachu2"]
+        auth = ["youEmail", "yourPass"]
 
         # Mail Server
         server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -377,10 +377,10 @@ class Email(Frame):
             if smtplib.SMTPException is False:
                 print("Email sent.")
 
-                db = sql.connect(host="192.168.1.21",
-                                 user="ZaneColeRiley",
-                                 password="CadenRiley214569",
-                                 database="archer")
+                db = sql.connect(host="yourHost",
+                         user="yourUser",
+                         password="yourPass",
+                         database="yourDatabase")
                 cursor = db.cursor()
 
                 stmt = f"""INSERT INTO archer.smtp (senderEmail, recipientsEmail, msg, date_time) VALUES  ('{self.senders_email.get()}', '{self.recipients_email.get()}', 
@@ -471,10 +471,10 @@ class Weather(Frame):
             response_json = response.json()
             air_response = response_air.json()
 
-            db = sql.connect(host="192.168.1.21",
-                             user="ZaneColeRiley",
-                             password="CadenRiley214569",
-                             database="archer")
+            db = sql.connect(host="yourHost",
+                         user="yourUser",
+                         password="yourPass",
+                         database="yourDatabase")
             cursor = db.cursor()
 
             insertTableInfo = f"""INSERT INTO archer.weather (condition_, temp_f, feelsLike, humidity, uvIndex, precip_in , air_Q, date_)  VALUES 
@@ -544,10 +544,10 @@ class Mood(Frame):
         self.back.place(x=550, y=680)
 
     def moodData(self):
-        db = sql.connect(host="192.168.1.21",
-                         user="ZaneColeRiley",
-                         password="CadenRiley214569",
-                         database="archer")
+        db = sql.connect(host="yourHost",
+                         user="yourUser",
+                         password="yourPass",
+                         database="yourDatabase")
         cursor = db.cursor()
 
         # Time
@@ -610,10 +610,10 @@ class Journal(Frame):
         self.back.place(x=640, y=660)
 
     def addEntry(self):
-        db = sql.connect(host="192.168.1.21",
-                         user="ZaneColeRiley",
-                         password="CadenRiley214569",
-                         database="archer")
+        db = sql.connect(host="yourHost",
+                         user="yourUser",
+                         password="yourPass",
+                         database="yourDatabase")
 
         cursor = db.cursor()
 
@@ -663,10 +663,10 @@ class Personal(Frame):
         self.back.place(x=520, y=560)
 
     def addEntry(self):
-        db = sql.connect(host="192.168.1.21",
-                         user="ZaneColeRiley",
-                         password="CadenRiley214569",
-                         database="archer")
+        db = sql.connect(host="yourHost",
+                         user="yourUser",
+                         password="yourPass",
+                         database="yourDatabase")
 
         cursor = db.cursor()
 
@@ -736,10 +736,10 @@ class Exercise(Frame):
         self.back.place(x=560, y=540)
 
     def addEntry(self):
-        db = sql.connect(host="192.168.1.21",
-                         user="ZaneColeRiley",
-                         password="CadenRiley214569",
-                         database="archer")
+        db = sql.connect(host="yourHost",
+                         user="yourUser",
+                         password="yourPass",
+                         database="yourDatabase")
 
         cursor = db.cursor()
 
@@ -816,10 +816,10 @@ class Meds(Frame):
         self.back.place(x=560, y=550)
 
     def addMorning(self):
-        db = sql.connect(host="192.168.1.21",
-                         user="ZaneColeRiley",
-                         password="CadenRiley214569",
-                         database="archer")
+        db = sql.connect(host="yourHost",
+                         user="yourUser",
+                         password="yourPass",
+                         database="yourDatabase")
 
         cursor = db.cursor()
 
@@ -855,10 +855,10 @@ class Meds(Frame):
         self.afternoon.delete(0, END)
 
     def addEvening(self):
-        db = sql.connect(host="192.168.1.21",
-                         user="ZaneColeRiley",
-                         password="CadenRiley214569",
-                         database="archer")
+        db = sql.connect(host="yourHost",
+                         user="yourUser",
+                         password="yourPass",
+                         database="yourDatabase")
 
         cursor = db.cursor()
 
@@ -873,10 +873,10 @@ class Meds(Frame):
         self.evening.delete(0, END)
 
     def addNight(self):
-        db = sql.connect(host="192.168.1.21",
-                         user="ZaneColeRiley",
-                         password="CadenRiley214569",
-                         database="archer")
+        db = sql.connect(host="yourHost",
+                         user="yourUser",
+                         password="yourPass",
+                         database="yourDatabase")
 
         cursor = db.cursor()
 
@@ -930,11 +930,10 @@ class ToDo(Frame):
         self.back.place(x=515, y=390)
 
     def addEntry(self):
-        db = sql.connect(host="192.168.1.21",
-                         user="ZaneColeRiley",
-                         password="CadenRiley214569",
-                         database="archer")
-
+        db = sql.connect(host="yourHost",
+                         user="yourUser",
+                         password="yourPass",
+                         database="yourDatabase")
         cursor = db.cursor()
 
         stmt = f"INSERT INTO archer.todo (shower, teeth, date_time) VALUES ('{self.shower.get()}', '{self.teeth.get()}', '{str(date.today()) + ' ' + self.systemTime}')"
@@ -992,10 +991,10 @@ class Encryption(Frame):
         self.back.place(x=515, y=410)
 
     def encryption(self):
-        db = sql.connect(host="192.168.1.21",
-                         user="ZaneColeRiley",
-                         password="CadenRiley214569",
-                         database="crypt")
+        db = sql.connect(host="yourHost",
+                         user="yourUser",
+                         password="yourPass",
+                         database="yourDatabase")
         cursor = db.cursor()
         stmt = f"INSERT INTO crypt.passwords (filename, password) VALUES ('{self.file.get()}', '{self.password.get()}')"
         cursor.execute(stmt)
